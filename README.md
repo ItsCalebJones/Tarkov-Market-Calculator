@@ -2,6 +2,9 @@
 
 A very simple Vue.js app to convert currencies used in Escape from Tarkov when selling items on the flea market.
 
+![43e1fd12fe64a9748173cabf0083109e](https://github.com/ItsCalebJones/Tarkov-Market-Calculator/assets/4519230/ee0233ba-3b93-4b56-8b95-73009592e238)
+
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
