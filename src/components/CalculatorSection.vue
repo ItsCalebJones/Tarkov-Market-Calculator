@@ -18,8 +18,8 @@ const userInputReceived = ref(false);
 const inputValue = ref(1000)
 const currencies = ref<Currency[]>([
     { name: '₽ Rubles', iso: "RUB", id: 1, description: "Rubles", conversion: 1000, symbol: "₽", initialValue: 1000},
-    { name: '$ USD', iso: "USD", id: 2, description: "USD", conversion: 131, symbol: "$", initialValue: 100},
-    { name: '€ Euro', iso: "EUR", id: 3, description: "Euro", conversion: 139, symbol: "€", initialValue: 100}
+    { name: '$ USD', iso: "USD", id: 2, description: "USD", conversion: 130, symbol: "$", initialValue: 100},
+    { name: '€ Euro', iso: "EUR", id: 3, description: "Euro", conversion: 138, symbol: "€", initialValue: 100}
 ]);
 var sourceCurrency = ref(currencies.value[0]);
 var targetCurrencies = ref(currencies.value.filter(currency => currency !== sourceCurrency.value));
