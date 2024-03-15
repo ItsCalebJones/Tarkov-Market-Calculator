@@ -15,22 +15,120 @@ interface Currency {
 
 const userInputReceived = ref(false);
 
+let data = ref(null);
+let euroCurrencyConversion = ref(10);
+let dollarCurrencyConversion = ref(10);
+
+
+
 const inputValue = ref(1000)
-const currencies = ref<Currency[]>([
-    { name: '₽ Rubles', iso: "RUB", id: 1, description: "Rubles", conversion: 1000, symbol: "₽", initialValue: 1000},
-    { name: '$ USD', iso: "USD", id: 2, description: "USD", conversion: 130, symbol: "$", initialValue: 100},
-    { name: '€ Euro', iso: "EUR", id: 3, description: "Euro", conversion: 138, symbol: "€", initialValue: 100}
-]);
+
+const rublesCurrency: Currency = {
+  name: '₽ Rubles',
+  iso: "RUB",
+  id: 1,
+  description: "Rubles",
+  conversion: 1000,
+  symbol: "₽",
+  initialValue: 1000
+};
+
+var dollarCurrency: Currency = {
+  name: '$ USD',
+  iso: "USD",
+  id: 2,
+  description: "USD",
+  conversion: dollarCurrencyConversion.value,
+  symbol: "$",
+  initialValue: 100
+};
+
+watch(dollarCurrency, (newValue) => {
+  console.log(newValue);
+});
+
+var euroCurrency: Currency = {
+  name: '€ Euro',
+  iso: "EUR",
+  id: 3,
+  description: "Euro",
+  conversion: euroCurrencyConversion.value,
+  symbol: "€",
+  initialValue: 100
+};
+
+watch(euroCurrency, (newValue) => {
+  console.log("updating something");
+  console.log(newValue);
+});
+
+// const { data, error } = useSWRV('https://api.eft-calculator.com/api/tarkov_item/', fetcher)
+const fetchData = async () => {
+  try {
+    const response = await fetch('https://api.eft-calculator.com/api/tarkov_item/');
+    data.value = await response.json();
+    if (data.value) {
+      euroCurrencyConversion.value = (data.value as { base_price: number }[])[0]?.base_price || 0;
+      dollarCurrencyConversion.value = (data.value as { base_price: number }[])[1]?.base_price || 0;
+    }
+    dollarCurrency = {
+      ...dollarCurrency,
+      conversion: dollarCurrencyConversion.value,
+    };
+    euroCurrency = {
+      ...euroCurrency,
+      conversion: euroCurrencyConversion.value,
+    };
+      // Update the currencies array to include the new currency objects
+      currencies.value = [rublesCurrency, dollarCurrency, euroCurrency];
+      sourceCurrency.value = currencies.value[0]
+      targetCurrencies.value = currencies.value.filter(currency => currency !== sourceCurrency.value)
+      targetCurrency.value = targetCurrencies.value[0]
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+};
+
+fetchData();
+
+watch(() => [dollarCurrency.conversion, euroCurrency.conversion], () => {
+  console.log("Conversion rates updated");
+  // Perform any additional logic if needed when conversion rates change
+}, { deep: true });
+
+const currencies = ref<Currency[]>([rublesCurrency, dollarCurrency, euroCurrency]);
+
+
 var sourceCurrency = ref(currencies.value[0]);
 var targetCurrencies = ref(currencies.value.filter(currency => currency !== sourceCurrency.value));
 var targetCurrency = ref(targetCurrencies.value[0]);
 
+watch(currencies, (newValue) => {
+  console.log("currencies updated " + newValue);
+  targetCurrencies.value = currencies.value.filter(currency => currency !== sourceCurrency.value)
+});
+
+watch(targetCurrencies, (newValue) => {
+  console.log("targetCurrency updated " + newValue);
+  targetCurrency.value = targetCurrencies.value[0];
+});
 
 watch(sourceCurrency, (newValue) => {
   targetCurrencies.value = currencies.value.filter(currency => currency !== sourceCurrency.value);
   targetCurrency.value = targetCurrencies.value[0];
-  if (!userInputReceived.value){
-    inputValue.value = newValue.initialValue;
+
+  if(newValue == null){
+    sourceCurrency.value = currencies.value[0];
+  } else {
+    if (!userInputReceived.value){
+      inputValue.value = newValue.initialValue;
+    }
+  }
+});
+
+watch(targetCurrency, (newValue) => {
+  if(newValue == null){
+    targetCurrency.value = targetCurrencies.value[0];
   }
 });
 
@@ -42,9 +140,9 @@ const setInputReceived = () => {
 const getConvertedValue = () => {
   let finalValue = 0;
 
-  const sourceId = sourceCurrency.value.id;
-  const targetId = targetCurrency.value.id;
-  const inputValueNumber = Number(inputValue.value);
+  let sourceId = sourceCurrency.value.id;
+  let targetId = targetCurrency.value.id;
+  let inputValueNumber = Number(inputValue.value);
 
   if (sourceId === 1) {
     // If source currency is rubles
@@ -106,6 +204,7 @@ const getConvertedValue = () => {
       <font-awesome-icon icon="fa-solid fa-circle-check" />
     </template>
     <template #heading>Output</template>
-    <h2> <b>{{ getConvertedValue() }}</b></h2>
+    <h2 v-if="{targetCurrency}"> <b>{{ getConvertedValue() }}</b></h2>
+    <h1 v-else>Oh no 😢</h1>
   </StepItem>
 </template>
